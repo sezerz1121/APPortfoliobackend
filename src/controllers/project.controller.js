@@ -131,4 +131,68 @@ const messageCreation = asyncHandler(async (req, res) => {
     );
 });
 
-export { projectListing,projectAll,messageCreation };
+
+
+
+const messageCreationTwo = asyncHandler(async (req, res) => {
+    const { name, email, message } = req.body;
+
+    if (!name) {
+        throw new ApiError(400, "name is required");
+    }
+    if (!email) {
+        throw new ApiError(400, "email is required");
+    }
+    if (!message) {
+        throw new ApiError(400, "message is required");
+    }
+
+    const newMessage = await Message.create({ name, email, message });
+    const createdMessage = await Message.findById(newMessage._id);
+
+    if (!createdMessage) {
+        throw new ApiError(500, "Something went wrong");
+    }
+
+    // Prepare email options
+    const mailOptions = {
+        from: process.env.SMTP_USER,
+        to: 'aryan050403@gmail.com', // Specify the recipient's email address here
+        subject: 'New Message Received',
+        text: message,
+        html: `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>New Message Received</title>
+            </head>
+            <body style="font-family: Arial, sans-serif; background-color: #f0f0f0; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                    <h2 style="color: #333333;">New Message Received</h2>
+                    <p style="color: #666666;">Below is the message content:</p>
+                    <p style="color: #333333; font-weight: bold; padding: 10px; background-color: #f5f5f5; border-left: 5px solid #3498db;">
+                        ${message}
+                    </p>
+                    <p style="color: #666666;">Sent by: ${name} (${email})</p>
+                    <p style="color: #666666;">Thank you!</p>
+                </div>
+            </body>
+            </html>
+        `,
+    };
+
+    // Send the email
+    try {
+        await sendEmail(mailOptions);
+        
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200, createdMessage, "New message listed successfully")
+    );
+});
+export { projectListing,projectAll,messageCreation,messageCreationTwo };
