@@ -157,7 +157,7 @@ const messageCreationTwo = asyncHandler(async (req, res) => {
     // Prepare email options
     const mailOptions = {
         from: process.env.SMTP_USER,
-        to: 'aryan050403@gmail.com', // Specify the recipient's email address here
+        to: 'Tatsamv900@gmail.com', // Specify the recipient's email address here
         subject: 'New Message Received',
         text: message,
         html: `
